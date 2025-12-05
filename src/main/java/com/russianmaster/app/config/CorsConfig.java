@@ -18,8 +18,7 @@ public class CorsConfig {
         // QUAN TRỌNG: Chỉ định chính xác Origin (không dùng *)
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://russian-elearning-pkkq-one.vercel.app",
-                "*"));
+                "https://russian-elearning-pkkq-one.vercel.app"));
 
         // Cho phép gửi credentials (cookie/session)
         configuration.setAllowCredentials(true);

@@ -5,11 +5,8 @@ COPY . .
 # Build file .jar (Bỏ qua test để build nhanh hơn)
 RUN mvn clean package -DskipTests
 
-# Giai đoạn 2: Chạy ứng dụng
-# [THAY ĐỔI QUAN TRỌNG]: Chuyển từ 'alpine' sang bản 'jre' (Debian) chuẩn
-# Bản này ổn định hơn nhiều về mạng và DNS so với Alpine
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-ENTRYPOINT ["java", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx350m", "-Xms350m", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]
