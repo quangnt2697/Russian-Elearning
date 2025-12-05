@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const PRODUCTION_URL = 'https://russian-backend.onrender.com/api';
+const PRODUCTION_URL = 'https://russian-elearning.onrender.com/api';
 const LOCAL_URL = 'http://localhost:8080/api';
 
 const API_URL = import.meta.env.MODE === 'production' ? PRODUCTION_URL : LOCAL_URL;; // lên prod thì thay url prod vào
