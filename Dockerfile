@@ -12,6 +12,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# FIX LỖI "Network unreachable" với Supabase:
-# Thêm cờ -Djava.net.preferIPv4Stack=true để ép dùng IPv4
 ENTRYPOINT ["java", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]
