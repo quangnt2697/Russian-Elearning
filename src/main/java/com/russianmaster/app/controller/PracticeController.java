@@ -94,15 +94,4 @@ public class PracticeController {
             return ResponseEntity.badRequest().body("Lỗi nộp bài: " + e.getMessage());
         }
     }
-
-    // --- API ADMIN: Tạo đề luyện tập mới ---
-    @PostMapping("/admin/practices")
-    public ResponseEntity<?> createPractice(@RequestBody Practice practice) {
-        try {
-            System.out.println("DEBUG: Creating practice: " + practice.getTitle());
-            return ResponseEntity.ok(practiceRepository.save(practice));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi tạo bài luyện tập: " + e.getMessage());
-        }
-    }
 }
