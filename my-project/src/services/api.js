@@ -1,12 +1,16 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api'; // lên prod thì thay url prod vào
+const PRODUCTION_URL = 'https://russian-backend.onrender.com/api';
+const LOCAL_URL = 'http://localhost:8080/api';
+
+const API_URL = import.meta.env.MODE === 'production' ? PRODUCTION_URL : LOCAL_URL;; // lên prod thì thay url prod vào
+
 
 // Helper để lấy full URL cho Audio/Image từ đường dẫn tương đối
 export const getResourceUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
-    return `http://localhost:8080${path}`;
+    return `${rootUrl}${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
 const api = axios.create({
