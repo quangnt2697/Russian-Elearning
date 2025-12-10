@@ -12,6 +12,8 @@ public class Lesson {
     private String title;
     @Column(length = 2000) private String description;
     @Column(columnDefinition = "TEXT") private String theory;
+    private String fileUrl; // [NEW] URL file gốc (PDF/DOCX/PPTX)
+    private String fileType; // [NEW] Loại file (PDF, DOCX, PPTX)
     private String icon;
     private String color;
     private String audioUrl; // URL file audio
