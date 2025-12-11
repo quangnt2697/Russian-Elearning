@@ -1,5 +1,6 @@
 package com.russianmaster.app.entity;
 
+import com.russianmaster.app.enums.CEFRLevel;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -17,4 +18,7 @@ public class Result {
     @Column(columnDefinition = "TEXT") private String adminFeedback;
     private boolean isReviewed;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private Integer totalWeightedScore; // Tổng điểm trọng số (Ví dụ: 85)
+    @Enumerated(EnumType.STRING)
+    private CEFRLevel detectedLevel; // Kết quả xếp loại: B1
 }

@@ -1,8 +1,11 @@
 package com.russianmaster.app.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.russianmaster.app.entity.Question;
 import com.russianmaster.app.entity.Result;
 import com.russianmaster.app.entity.Test;
 import com.russianmaster.app.entity.User;
+import com.russianmaster.app.enums.CEFRLevel;
 import com.russianmaster.app.repository.ResultRepository;
 import com.russianmaster.app.repository.TestRepository;
 import com.russianmaster.app.repository.UserRepository;
@@ -68,7 +71,7 @@ public class TestController {
         }
     }
 
-    // Nộp bài kiểm tra
+    // API Nộp bài - Đã nâng cấp logic A1-C2
     @PostMapping("/submit")
     public ResponseEntity<?> submitTest(@RequestBody Map<String, Object> payload) {
         try {
@@ -85,27 +88,64 @@ public class TestController {
 
             // 2. Parse dữ liệu từ payload
             Long testId = Long.parseLong(payload.get("testId").toString());
-            Double score = Double.valueOf(payload.get("score").toString());
-            String userAnswers = payload.get("userAnswers").toString();
 
-            // 3. Tìm bài Test gốc
+            Map<String, Object> userAnswersMap = (Map<String, Object>) payload.get("answers");
+
             Test test = testRepository.findById(testId)
                     .orElseThrow(() -> new RuntimeException("Bài kiểm tra không tồn tại ID: " + testId));
+
+            int userWeightedScore = 0;
+            int maxPossibleScore = 0;
+
+            for (Question q : test.getQuestions()) {
+                // Luôn cộng vào điểm tối đa
+                maxPossibleScore += q.getDifficultyLevel().getWeight(); // A1=1, ..., C2=6
+
+                String qId = String.valueOf(q.getId());
+                if (userAnswersMap.containsKey(qId)) {
+                    String userAns = userAnswersMap.get(qId).toString();
+                    if (userAns.equalsIgnoreCase(q.getCorrectKey())) {
+                        userWeightedScore += q.getDifficultyLevel().getWeight();
+                    }
+                }
+            }
+
+            // 3. Tính phần trăm (Tránh chia cho 0)
+            double percentage = (maxPossibleScore > 0)
+                    ? ((double) userWeightedScore / maxPossibleScore) * 100
+                    : 0;
+
+            // 3. XẾP LOẠI (Ranking Logic)
+            CEFRLevel detectedLevel = calculateLevelByPercentage(percentage);
 
             // 4. Lưu kết quả
             Result result = new Result();
             result.setUser(user);
             result.setTest(test);
-            result.setScore(score);
-            result.setUserAnswers(userAnswers);
-            result.setReviewed(false);
+            result.setScore((double) userWeightedScore); // Số câu đúng thô
+            result.setTotalWeightedScore(maxPossibleScore);
+            result.setDetectedLevel(detectedLevel);
+            result.setUserAnswers(new ObjectMapper().writeValueAsString(userAnswersMap));
 
             resultRepository.save(result);
 
-            return ResponseEntity.ok("Nộp bài thành công!");
+            return ResponseEntity.ok(Map.of(
+                    "message", "Nộp bài thành công",
+                    "level", detectedLevel,
+                    "score", maxPossibleScore
+            ));
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Lỗi nộp bài: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         }
+    }
+
+    private CEFRLevel calculateLevelByPercentage(double percentage) {
+        if (percentage < 20) return CEFRLevel.A1; // Hoặc tạo thêm Enum Pre_A1 nếu muốn
+        if (percentage < 40) return CEFRLevel.A1;
+        if (percentage < 60) return CEFRLevel.A2;
+        if (percentage < 75) return CEFRLevel.B1; // Ngưỡng B1 thường rộng hơn
+        if (percentage < 90) return CEFRLevel.B2;
+        if (percentage < 97) return CEFRLevel.C1;
+        return CEFRLevel.C2;
     }
 }

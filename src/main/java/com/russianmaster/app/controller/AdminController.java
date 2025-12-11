@@ -107,10 +107,17 @@ public class AdminController {
 
             // 2. Xác định loại file
             String originalFilename = file.getOriginalFilename();
-            String fileType = "UNKNOWN";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                fileType = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toUpperCase();
+            String extension = "";
+            if (originalFilename != null && originalFilename.lastIndexOf(".") > 0) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
             }
+
+            String fileType = "UNKNOWN";
+            if (List.of("DOC", "DOCX").contains(extension)) fileType = "DOCX";
+            else if (List.of("PPT", "PPTX").contains(extension)) fileType = "PPTX";
+            else if (List.of("PDF").contains(extension)) fileType = "PDF";
+            else if (List.of("XLS", "XLSX").contains(extension)) fileType = "XLSX";
+            else if (List.of("MP4", "WEBM").contains(extension)) fileType = "VIDEO";
 
             // 3. Trích xuất text (nếu là PDF/DOCX) để lưu vào theory (dùng cho search/preview text)
             // Nếu là PPTX thì text extraction có thể phức tạp, tạm thời để trống hoặc chỉ extract nếu hỗ trợ
